@@ -1,15 +1,29 @@
 @echo off
+setlocal
 title Couch-TV - Headless Remote Server
 cd /d "%~dp0"
 
-if exist ".venv\Scripts\python.exe" (
-    set "PY_EXE=.venv\Scripts\python.exe"
-) else (
-    set "PY_EXE=python"
+:: Check if virtual environment exists
+if not exist ".venv\Scripts\python.exe" (
+    echo ====================================================
+    echo [!] Virtual environment not found.
+    echo Running installer.bat to set up dependencies...
+    echo ====================================================
+    echo.
+    call installer.bat
+    if not exist ".venv\Scripts\python.exe" (
+        echo [!] Installation failed or was cancelled.
+        pause
+        exit /b 1
+    )
 )
 
 echo ====================================================
 echo Starting Couch-TV in Headless Background Mode...
 echo ====================================================
-"%PY_EXE%" server\app.py --headless
-pause
+".venv\Scripts\python.exe" server\app.py --headless
+if %errorlevel% neq 0 (
+    echo.
+    echo [!] Server exited with code %errorlevel%.
+    pause
+)
