@@ -303,10 +303,13 @@ def start_flask_https():
 
 # ----------------- PySide6 GUI Components -----------------
 try:
-    from PySide6.QtWidgets import QApplication, QMainWindow, QSystemTrayIcon, QMenu, QWidget, QPushButton, QHBoxLayout
+    from PySide6.QtWidgets import (
+        QApplication, QMainWindow, QSystemTrayIcon, QMenu, QWidget, QPushButton,
+        QHBoxLayout, QGraphicsOpacityEffect
+    )
     from PySide6.QtWebEngineWidgets import QWebEngineView
-    from PySide6.QtCore import QUrl, QObject, Signal, Qt
-    from PySide6.QtGui import QIcon, QKeySequence, QShortcut
+    from PySide6.QtCore import QUrl, QObject, Signal, Qt, QTimer, QPropertyAnimation, QEasingCurve, QEvent
+    from PySide6.QtGui import QIcon, QKeySequence, QShortcut, QCursor
     HAS_GUI = True
 except ImportError:
     HAS_GUI = False
@@ -334,7 +337,8 @@ class TvWindowManager:
         self.bridge.hide_back_btn.emit()
 
 class FloatingBackButton(QWidget):
-    """Floating button pinned on top of any launched streaming app to return to the TV Launcher."""
+    """Floating button pinned on top of any launched streaming app to return to the TV Launcher.
+    Smoothly fades out during playback so user can experience full screen, and reappears when hovered."""
     def __init__(self, on_click):
         super().__init__()
         self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool)
@@ -365,9 +369,69 @@ class FloatingBackButton(QWidget):
         """)
         self.btn.clicked.connect(on_click)
         layout.addWidget(self.btn)
+        self.btn.installEventFilter(self)
+
+        # Smooth Opacity Effect and Property Animation
+        self.opacity_effect = QGraphicsOpacityEffect(self)
+        self.setGraphicsEffect(self.opacity_effect)
+        self.opacity_effect.setOpacity(1.0)
+
+        self.anim = QPropertyAnimation(self.opacity_effect, b"opacity")
+
+        # Auto-fade timer: starts after showing or leaving hover
+        self.fade_timer = QTimer(self)
+        self.fade_timer.setSingleShot(True)
+        self.fade_timer.timeout.connect(self.fade_out)
 
         # Position in top-left
         self.move(30, 25)
+
+    def fade_to(self, target_opacity: float, duration_ms: int = 300):
+        self.anim.stop()
+        self.anim.setDuration(duration_ms)
+        self.anim.setStartValue(self.opacity_effect.opacity())
+        self.anim.setEndValue(target_opacity)
+        self.anim.setEasingCurve(QEasingCurve.InOutQuad)
+        self.anim.start()
+
+    def fade_in(self):
+        self.fade_timer.stop()
+        self.fade_to(1.0, 250)
+
+    def fade_out(self):
+        # 0.02 keeps hit-testing alive in Windows DWM while being virtually invisible during full screen video
+        self.fade_to(0.02, 600)
+
+    def show_and_reset(self):
+        self.fade_timer.stop()
+        self.anim.stop()
+        self.opacity_effect.setOpacity(1.0)
+        self.show()
+        self.raise_()
+        self.fade_timer.start(3500)
+
+    def hide(self):
+        self.fade_timer.stop()
+        self.anim.stop()
+        super().hide()
+
+    def enterEvent(self, event):
+        self.fade_in()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        if not self.rect().contains(self.mapFromGlobal(QCursor.pos())):
+            self.fade_timer.start(2500)
+        super().leaveEvent(event)
+
+    def eventFilter(self, watched, event):
+        if watched == self.btn:
+            if event.type() == QEvent.Enter:
+                self.fade_in()
+            elif event.type() == QEvent.Leave:
+                if not self.rect().contains(self.mapFromGlobal(QCursor.pos())):
+                    self.fade_timer.start(2500)
+        return super().eventFilter(watched, event)
 
 class FloatingTvPill(QWidget):
     """Always-on-top pill button on desktop to return to TV mode."""
@@ -420,7 +484,7 @@ class TvWindow(QMainWindow):
         # Connect signals
         self.bridge.switch_to_tv.connect(self.activate_tv_mode)
         self.bridge.switch_to_pc.connect(self.activate_pc_mode)
-        self.bridge.show_back_btn.connect(self.floating_back_btn.show)
+        self.bridge.show_back_btn.connect(self.floating_back_btn.show_and_reset)
         self.bridge.hide_back_btn.connect(self.floating_back_btn.hide)
 
         # Hotkeys
