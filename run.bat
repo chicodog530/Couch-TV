@@ -1,7 +1,8 @@
 @echo off
 setlocal
-title Couch-TV - TV Launcher & Remote Server
+title Couch-TV - TV Launcher and Remote Server
 cd /d "%~dp0"
+set "PYTHONPATH=%~dp0"
 
 :: Check if virtual environment exists
 if not exist ".venv\Scripts\python.exe" (

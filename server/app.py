@@ -11,15 +11,17 @@ from flask import Flask, render_template, request, jsonify
 from websockets.asyncio.server import serve
 import websockets
 
+# Ensure project root is in sys.path BEFORE any package imports
+PROJECT_ROOT = Path(sys._MEIPASS) if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS") else Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from server.paths import get_bundle_dir, get_data_dir, ensure_config_files
 
 ensure_config_files()
 
 BUNDLE_DIR = get_bundle_dir()
 DATA_DIR = get_data_dir()
-PROJECT_ROOT = BUNDLE_DIR
-
-sys.path.insert(0, str(PROJECT_ROOT))
 
 from server.network_utils import get_local_ip, generate_qr_data_uri
 from server.audio_controller import audio_ctrl

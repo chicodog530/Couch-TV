@@ -2,6 +2,7 @@
 setlocal
 title Couch-TV - Headless Remote Server
 cd /d "%~dp0"
+set "PYTHONPATH=%~dp0"
 
 :: Check if virtual environment exists
 if not exist ".venv\Scripts\python.exe" (

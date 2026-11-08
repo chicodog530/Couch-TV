@@ -3,6 +3,7 @@ websockets>=13.0
 pycaw>=20240210
 comtypes>=1.4.0
 pyside6>=6.6.0
+segno>=1.6.0
 qrcode>=7.4.2
 pillow>=10.0.0
 cryptography>=42.0.0

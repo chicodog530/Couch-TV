@@ -1,5 +1,18 @@
 import socket
-import segno
+import base64
+import io
+
+try:
+    import segno
+    HAS_SEGNO = True
+except ImportError:
+    HAS_SEGNO = False
+
+try:
+    import qrcode
+    HAS_QRCODE = True
+except ImportError:
+    HAS_QRCODE = False
 
 def get_local_ip() -> str:
     """
@@ -19,6 +32,15 @@ def get_local_ip() -> str:
 def generate_qr_data_uri(url: str, scale: int = 5) -> str:
     """
     Generates a PNG data URI for the given URL to display in HTML.
+    Supports either segno or qrcode.
     """
-    qr = segno.make_qr(url)
-    return qr.png_data_uri(scale=scale, dark='#000000', light='#ffffff')
+    if HAS_SEGNO:
+        qr = segno.make_qr(url)
+        return qr.png_data_uri(scale=scale, dark='#000000', light='#ffffff')
+    elif HAS_QRCODE:
+        img = qrcode.make(url)
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+        return f"data:image/png;base64,{b64}"
+    return ""
