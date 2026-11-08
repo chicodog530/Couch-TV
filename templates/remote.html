@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>CouchPC Remote</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#0e111a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="/static/css/remote.css?v=7">
+</head>
+<body style="background-image: url('{{ settings.background }}');">
+
+  <div class="mobile-bg-tint"></div>
+
+  <!-- Top Status & Mode Header -->
+  <header class="app-header">
+    <div class="header-top">
+      <div class="brand-badge">
+        <span id="status-dot" class="status-dot"></span>
+        <span>CouchPC</span>
+      </div>
+
+      <!-- Voice Control Button -->
+      <button id="btn-voice" class="btn-voice" title="Voice Control">
+        <span class="mic-icon">🎙️</span>
+        <span class="voice-text">Voice</span>
+      </button>
+
+      <!-- TV vs PC Mode Switcher -->
+      <div class="mode-switch-group">
+        <button id="btn-mode-tv" class="mode-btn active">📺 TV</button>
+        <button id="btn-mode-pc" class="mode-btn">💻 PC</button>
+      </div>
+    </div>
+
+    <!-- Quick Back to TV Banner (shown when apps are open) -->
+    <div id="quick-back-bar" class="quick-back-bar">
+      <span>App open on TV</span>
+      <button id="btn-remote-back-tv" class="btn-remote-back-tv">⬅ Back to TV Main Screen</button>
+    </div>
+
+    <!-- Master Volume Bar -->
+    <div class="volume-row">
+      <button id="btn-mute" class="vol-icon-btn">🔊</button>
+      <button id="vol-down" class="vol-icon-btn">➖</button>
+      <div class="vol-slider-wrap">
+        <input type="range" id="vol-slider" class="vol-slider" min="0" max="100" value="50">
+      </div>
+      <button id="vol-up" class="vol-icon-btn">➕</button>
+      <span id="vol-val" class="vol-val">50%</span>
+    </div>
+  </header>
+
+  <!-- Main Viewports -->
+  <main class="views-container">
+
+    <!-- 1. Trackpad View -->
+    <section id="view-trackpad" class="view-panel active">
+      <!-- Gyro Status & HTTPS Helper Banner -->
+      <div id="gyro-status-bar" class="gyro-status-bar">
+        <span id="gyro-status-text">🎯 Gyroscope ready</span>
+        {% if not is_https %}
+        <button type="button" id="btn-switch-https" class="gyro-https-pill">Enable Sensor (HTTPS)</button>
+        {% endif %}
+      </div>
+
+      <div class="trackpad-wrapper">
+        <div id="trackpad-surface" class="trackpad-surface">
+          <div class="trackpad-hint">
+            👆 Swipe to Move Cursor<br>
+            • Tap = Left Click<br>
+            •• 2-Finger Tap = Right Click<br>
+            •• 2-Finger Drag = Scroll
+          </div>
+        </div>
+        <div id="scroll-strip" class="scroll-strip">
+          <span>▲</span>
+          <span style="writing-mode: vertical-rl;">SCROLL</span>
+          <span>▼</span>
+        </div>
+      </div>
+
+      <!-- Air Mouse Trigger Button -->
+      <div class="air-mouse-bar">
+        <button id="btn-air-trigger" class="btn-air-trigger">
+          <span>🎯 HOLD TO MOVE AIR MOUSE</span>
+        </button>
+      </div>
+
+      <!-- Quick Gyro Alignment & Keyboard Toggles -->
+      <div class="gyro-tuning-row">
+        <button type="button" id="btn-auto-kb" class="tuning-pill active" title="Automatically open keyboard on click">⌨️ Auto-KB: ON</button>
+        <button type="button" id="btn-swap-axes" class="tuning-pill">⇄ Swap</button>
+        <button type="button" id="btn-inv-y" class="tuning-pill">↕ Inv Y</button>
+        <button type="button" id="btn-inv-x" class="tuning-pill">↔ Inv X</button>
+        <div class="tuning-sens">
+          <button type="button" id="btn-sens-down" class="sens-btn">➖</button>
+          <span id="sens-label">1.5x</span>
+          <button type="button" id="btn-sens-up" class="sens-btn">➕</button>
+        </div>
+      </div>
+
+      <!-- Hidden live input for native Samsung keyboard -->
+      <input type="text" id="live-keyboard-input" class="hidden-live-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+      <!-- Active Typing Dock (shown when phone keyboard is open) -->
+      <div id="typing-dock" class="typing-dock">
+        <span class="typing-dock-label">⌨️ Typing to PC...</span>
+        <button type="button" id="btn-hide-keyboard" class="btn-hide-kb">Done ✕</button>
+      </div>
+
+      <div class="trackpad-buttons">
+        <button id="btn-left-click" class="btn-click">🖱️ Click</button>
+        <button id="btn-summon-kb" class="btn-click btn-kb-direct">⌨️ Type</button>
+        <button id="btn-drag-lock" class="btn-click btn-drag-lock">🔒 Drag</button>
+        <button id="btn-gyro-toggle" class="btn-click btn-gyro" title="Air Mouse (Continuous)">🎯 Gyro</button>
+        <button id="btn-right-click" class="btn-click">Right Click</button>
+      </div>
+
+      <!-- Quick Jump to Apps & Shortcuts -->
+      <div class="quick-apps-jump-bar">
+        <button type="button" class="quick-apps-pill btn-goto-apps">
+          <span>📱 App Tiles & Shortcuts (Add / Edit / Sort)</span>
+          <span class="jump-arrow">➔</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. D-Pad & Navigation View -->
+    <section id="view-nav" class="view-panel">
+      <!-- Big D-Pad -->
+      <div class="dpad-container">
+        <button class="dpad-btn dpad-up" data-key="up">▲</button>
+        <button class="dpad-btn dpad-left" data-key="left">◀</button>
+        <button class="dpad-btn dpad-ok" data-key="enter">OK</button>
+        <button class="dpad-btn dpad-right" data-key="right">▶</button>
+        <button class="dpad-btn dpad-down" data-key="down">▼</button>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="nav-actions-grid">
+        <button class="nav-action-btn" data-key="esc">
+          <span>🔙</span>
+          <span>Back</span>
+        </button>
+        <button class="nav-action-btn" data-key="win">
+          <span>🪟</span>
+          <span>Start</span>
+        </button>
+        <button class="nav-action-btn" data-hotkey="win_d">
+          <span>🖥️</span>
+          <span>Desktop</span>
+        </button>
+        <button class="nav-action-btn" data-key="tab">
+          <span>⇥</span>
+          <span>Tab</span>
+        </button>
+        <button class="nav-action-btn" data-hotkey="alt_tab">
+          <span>📑</span>
+          <span>Switch App</span>
+        </button>
+        <button class="nav-action-btn" data-hotkey="alt_f4" style="color: var(--danger-color);">
+          <span>✕</span>
+          <span>Close App</span>
+        </button>
+      </div>
+
+      <!-- Media Controls -->
+      <div class="media-controls-bar">
+        <button class="media-btn" data-key="media_prev">⏮️</button>
+        <button class="media-btn" data-key="left">⏪ 10s</button>
+        <button class="media-btn play-btn" data-key="media_play_pause">⏯️</button>
+        <button class="media-btn" data-key="right">10s ⏩</button>
+        <button class="media-btn" data-key="media_next">⏭️</button>
+      </div>
+
+      <!-- Quick Jump to Apps & Shortcuts -->
+      <div class="quick-apps-jump-bar">
+        <button type="button" class="quick-apps-pill btn-goto-apps">
+          <span>📱 App Tiles & Shortcuts (Add / Edit / Sort)</span>
+          <span class="jump-arrow">➔</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 3. Apps & Streaming Shortcuts View -->
+    <section id="view-apps" class="view-panel">
+      <div class="apps-header-row">
+        <span class="apps-title">Apps & Streaming</span>
+        <div class="apps-header-btns">
+          <button type="button" id="btn-toggle-edit-mode" class="btn-edit-mode">✏️ Edit & Sort Tiles</button>
+          <button type="button" id="btn-open-add-sc" class="btn-add-sc">➕ Add App</button>
+        </div>
+      </div>
+
+      <div class="apps-tip-bar">
+        <span>💡 Tap <b>"✏️ Edit & Sort Tiles"</b> to reorder with ◀ 🔝 ▶, drag tiles, or delete ✕</span>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="category-filters-row">
+        <button type="button" class="cat-filter-btn active" data-category="All">All</button>
+        <button type="button" class="cat-filter-btn" data-category="Free TV">🆓 Free TV</button>
+        <button type="button" class="cat-filter-btn" data-category="Streaming">Streaming</button>
+        <button type="button" class="cat-filter-btn" data-category="Media">Media</button>
+        <button type="button" class="cat-filter-btn" data-category="Games">Games</button>
+        <button type="button" class="cat-filter-btn" data-category="System">System</button>
+      </div>
+
+      <!-- Edit Mode Action Bar -->
+      <div id="edit-mode-bar" class="edit-mode-bar">
+        <div class="edit-bar-title">Reorder & Delete:</div>
+        <div class="edit-quick-sorts">
+          <button type="button" id="btn-sort-az" class="edit-sort-btn">🔤 A-Z</button>
+          <button type="button" id="btn-sort-cat" class="edit-sort-btn">📁 Category</button>
+        </div>
+        <button type="button" id="btn-done-edit" class="btn-done-edit">Done ✓</button>
+      </div>
+
+      <div id="apps-grid" class="apps-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- 4. Keyboard View -->
+    <section id="view-keyboard" class="view-panel">
+      <div class="text-send-box">
+        <input type="text" id="text-input" class="text-input" placeholder="Type text to send to PC..." autocomplete="off">
+        <button id="btn-send-text" class="btn-send-text">Send</button>
+      </div>
+
+      <div class="keyboard-grid">
+        <button class="key-btn" data-key="enter">Enter ↵</button>
+        <button class="key-btn" data-key="backspace">Backspace ⌫</button>
+        <button class="key-btn" data-key="space">Space</button>
+        <button class="key-btn" data-key="esc">Esc</button>
+        <button class="key-btn" data-key="tab">Tab</button>
+        <button class="key-btn" data-key="up">▲ Up</button>
+        <button class="key-btn" data-key="down">▼ Down</button>
+        <button class="key-btn" data-key="delete">Del</button>
+        <button class="key-btn" data-key="left">◀ Left</button>
+        <button class="key-btn" data-key="right">▶ Right</button>
+        <button class="key-btn" data-key="home">Home</button>
+        <button class="key-btn" data-key="end">End</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Tab Navigation -->
+  <nav class="bottom-nav">
+    <button class="tab-btn active" data-tab="trackpad">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><line x1="12" y1="16" x2="12" y2="20"/><line x1="3" y1="16" x2="21" y2="16"/></svg>
+      <span>Trackpad</span>
+    </button>
+    <button class="tab-btn" data-tab="nav">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 8 8 12 12 16"/><polyline points="16 12 12 12"/></svg>
+      <span>Remote</span>
+    </button>
+    <button class="tab-btn" data-tab="apps">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Apps</span>
+    </button>
+    <button class="tab-btn" data-tab="keyboard">
+      <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="6" y1="9" x2="6" y2="9.01"/><line x1="10" y1="9" x2="10" y2="9.01"/><line x1="14" y1="9" x2="14" y2="9.01"/><line x1="18" y1="9" x2="18" y2="9.01"/><line x1="7" y1="15" x2="17" y2="15"/></svg>
+      <span>Keyboard</span>
+    </button>
+  </nav>
+
+  <!-- Add Shortcut Modal / App Catalog -->
+  <div id="add-modal" class="modal-overlay">
+    <div class="modal-card catalog-modal-card">
+      <div class="modal-header-row">
+        <div class="modal-title">📦 Add App / Service</div>
+        <button type="button" id="btn-close-add-modal" class="modal-close-x">✕</button>
+      </div>
+
+      <!-- Search & Category Filter Chips -->
+      <div class="catalog-controls">
+        <input type="text" id="cat-search-input" class="cat-search-input" placeholder="🔍 Search 30+ apps (Tubi, Pluto, Netflix, Steam...)" autocomplete="off">
+        <div class="catalog-filters-scroll">
+          <button type="button" class="catalog-filter-chip active" data-cat="All">All</button>
+          <button type="button" class="catalog-filter-chip" data-cat="Free TV">🆓 Free TV</button>
+          <button type="button" class="catalog-filter-chip" data-cat="Streaming">🎬 Streaming</button>
+          <button type="button" class="catalog-filter-chip" data-cat="Music">🎵 Music</button>
+          <button type="button" class="catalog-filter-chip" data-cat="Gaming">🎮 Gaming</button>
+          <button type="button" class="catalog-filter-chip" data-cat="News">📰 News</button>
+          <button type="button" class="catalog-filter-chip" data-cat="custom">➕ Custom URL</button>
+        </div>
+      </div>
+
+      <!-- App Catalog Items List (Scrollable) -->
+      <div id="catalog-list" class="catalog-list">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Custom App / URL Form (Hidden unless 'Custom URL' chip clicked) -->
+      <div id="custom-app-form" class="custom-app-form" style="display: none;">
+        <div class="form-group">
+          <label class="form-label">App Name</label>
+          <input type="text" id="sc-name" class="form-input" placeholder="e.g. My Favorite Site">
+        </div>
+        <div class="form-group">
+          <label class="form-label">URL or Path</label>
+          <input type="text" id="sc-target" class="form-input" placeholder="https://... or C:\path\app.exe">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select id="sc-cat" class="form-input">
+            <option value="Streaming">Streaming</option>
+            <option value="Free TV">Free TV</option>
+            <option value="Media">Media</option>
+            <option value="Games">Games</option>
+            <option value="System">System</option>
+          </select>
+        </div>
+        <input type="hidden" id="sc-color" value="linear-gradient(135deg, #6366f1, #4338ca)">
+        <div class="modal-actions">
+          <button type="button" id="btn-cancel-custom" class="modal-btn cancel">Back to Catalog</button>
+          <button type="button" id="btn-save-sc" class="modal-btn primary">Save Shortcut</button>
+        </div>
+      </div>
+    </div>
+  </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Voice Command Modal Overlay -->
+  <div id="voice-modal" class="voice-modal-overlay">
+    <div class="voice-modal-card">
+      <div class="voice-wave-container">
+        <div id="voice-circle" class="voice-circle pulse">🎙️</div>
+      </div>
+      <div id="voice-modal-status" class="voice-modal-status">Listening...</div>
+
+      <!-- Voice Text / Dictation Input -->
+      <div class="voice-input-wrapper">
+        <input type="text" id="voice-command-input" class="voice-command-input" placeholder="Listening... (or speak here)" autocomplete="off">
+        <button type="button" id="btn-submit-voice" class="btn-submit-voice">Go ↵</button>
+      </div>
+
+      <div id="voice-modal-transcript" class="voice-modal-transcript">Speak a command (e.g. "Hulu", "Volume 10")</div>
+
+      <div class="voice-hints">
+        <button type="button" class="hint-pill" data-voice-cmd="hulu">Hulu</button>
+        <button type="button" class="hint-pill" data-voice-cmd="prime">Prime</button>
+        <button type="button" class="hint-pill" data-voice-cmd="netflix">Netflix</button>
+        <button type="button" class="hint-pill" data-voice-cmd="youtube">YouTube</button>
+        <button type="button" class="hint-pill" data-voice-cmd="volume 10">Vol 10</button>
+        <button type="button" class="hint-pill" data-voice-cmd="pc mode">PC Mode</button>
+      </div>
+
+      <button type="button" id="btn-cancel-voice" class="btn-cancel-voice">Close</button>
+    </div>
+  </div>
+
+  <script>
+    window.SERVER_WS_PORT = {{ ws_port }};
+    window.IS_HTTPS = {{ 'true' if is_https else 'false' }};
+  </script>
+  <script src="/static/js/remote.js?v=7"></script>
+</body>
+</html>

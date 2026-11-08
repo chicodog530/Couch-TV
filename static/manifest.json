@@ -1,0 +1,16 @@
+{
+  "name": "CouchPC Remote",
+  "short_name": "CouchRemote",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0f17",
+  "theme_color": "#111422",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/static/icons/remote_icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

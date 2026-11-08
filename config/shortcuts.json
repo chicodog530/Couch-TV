@@ -1,0 +1,146 @@
+[
+  {
+    "id": "hulu",
+    "name": "Hulu",
+    "type": "url",
+    "target": "https://www.hulu.com",
+    "icon": "hulu",
+    "color": "linear-gradient(135deg, #1ce783, #00ba58)",
+    "category": "Streaming"
+  },
+  {
+    "id": "prime",
+    "name": "Prime Video",
+    "type": "url",
+    "target": "https://www.amazon.com/gp/video/storefront",
+    "icon": "prime",
+    "color": "linear-gradient(135deg, #00A8E1, #006699)",
+    "category": "Streaming"
+  },
+  {
+    "id": "youtube",
+    "name": "YouTube",
+    "type": "url",
+    "target": "https://www.youtube.com",
+    "icon": "youtube",
+    "color": "linear-gradient(135deg, #FF0000, #B20000)",
+    "category": "Streaming"
+  },
+  {
+    "id": "disney",
+    "name": "Disney+",
+    "type": "url",
+    "target": "https://www.disneyplus.com",
+    "icon": "disney",
+    "color": "linear-gradient(135deg, #113CCF, #0E1B4F)",
+    "category": "Streaming"
+  },
+  {
+    "id": "tubi",
+    "name": "Tubi",
+    "type": "url",
+    "target": "https://tubitv.com",
+    "icon": "tubi",
+    "color": "linear-gradient(135deg, #FA4900, #FF7B00)",
+    "category": "Free TV"
+  },
+  {
+    "id": "pluto",
+    "name": "Pluto TV",
+    "type": "url",
+    "target": "https://pluto.tv",
+    "icon": "pluto",
+    "color": "linear-gradient(135deg, #FFE600, #111111)",
+    "category": "Free TV"
+  },
+  {
+    "id": "roku_channel",
+    "name": "The Roku Channel",
+    "type": "url",
+    "target": "https://therokuchannel.roku.com",
+    "icon": "roku",
+    "color": "linear-gradient(135deg, #662D91, #30124E)",
+    "category": "Free TV"
+  },
+  {
+    "id": "plex_free",
+    "name": "Plex Free TV",
+    "type": "url",
+    "target": "https://watch.plex.tv",
+    "icon": "plex",
+    "color": "linear-gradient(135deg, #E5A00D, #995c00)",
+    "category": "Free TV"
+  },
+  {
+    "id": "xumo",
+    "name": "Xumo Play",
+    "type": "url",
+    "target": "https://www.xumoplay.com",
+    "icon": "xumo",
+    "color": "linear-gradient(135deg, #00B4D8, #0077B6)",
+    "category": "Free TV"
+  },
+  {
+    "id": "crackle",
+    "name": "Crackle",
+    "type": "url",
+    "target": "https://www.crackle.com",
+    "icon": "crackle",
+    "color": "linear-gradient(135deg, #FF6600, #B34700)",
+    "category": "Free TV"
+  },
+  {
+    "id": "netflix",
+    "name": "Netflix",
+    "type": "url",
+    "target": "https://www.netflix.com",
+    "icon": "netflix",
+    "color": "linear-gradient(135deg, #E50914, #990000)",
+    "category": "Streaming"
+  },
+  {
+    "id": "twitch",
+    "name": "Twitch",
+    "type": "url",
+    "target": "https://www.twitch.tv",
+    "icon": "twitch",
+    "color": "linear-gradient(135deg, #9146FF, #5c16c5)",
+    "category": "Gaming"
+  },
+  {
+    "id": "steam",
+    "name": "Steam Big Picture",
+    "type": "app",
+    "target": "steam://open/bigpicture",
+    "icon": "steam",
+    "color": "linear-gradient(135deg, #171a21, #2a475e)",
+    "category": "Games"
+  },
+  {
+    "id": "browser",
+    "name": "Web Browser",
+    "type": "url",
+    "target": "https://www.google.com",
+    "icon": "browser",
+    "color": "linear-gradient(135deg, #4285F4, #0F52BA)",
+    "category": "System"
+  },
+  {
+    "id": "desktop",
+    "name": "PC Desktop Mode",
+    "type": "action",
+    "target": "pc_mode",
+    "icon": "desktop",
+    "color": "linear-gradient(135deg, #6c5ce7, #4834d4)",
+    "category": "System"
+  },
+  {
+    "name": "PBS & Docuseries",
+    "target": "https://www.pbs.org/livestream",
+    "type": "url",
+    "category": "Free TV",
+    "color": "linear-gradient(135deg, #002244, #005088)",
+    "icon": "pbs",
+    "id": "sc_b14a4862"
+  }
+]

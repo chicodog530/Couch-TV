@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CouchPC - TV Mode</title>
+  <link rel="stylesheet" href="/static/css/tv.css?v=8">
+</head>
+<body style="background-image: url('{{ settings.background }}');">
+
+  <!-- Ambient Backdrop Overlay -->
+  <div class="bg-overlay"></div>
+
+  <!-- Top 10-Foot Header -->
+  <header class="tv-header">
+    <div class="tv-brand">
+      <div class="tv-logo-badge">📺 CouchPC</div>
+      <span>TV Launcher</span>
+    </div>
+
+    <div class="tv-clock-wrap">
+      <div id="tv-clock" class="tv-clock">12:00 PM</div>
+      <div id="tv-date" class="tv-date">Loading...</div>
+    </div>
+
+    <div class="tv-header-actions">
+      <!-- Background Picker Button -->
+      <button id="btn-open-bg-picker" class="btn-bg-picker" title="Change TV Background Wallpaper">
+        <span>🎨</span>
+        <span>Background</span>
+      </button>
+
+      <!-- Click here for PC mode -->
+      <button id="btn-pc-mode" class="btn-pc-mode" title="Switch to regular Windows PC desktop">
+        <span>💻 CLICK HERE FOR PC MODE</span>
+        <span class="key-hint">ESC / F11</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main TV Layout -->
+  <div class="tv-main-layout">
+
+    <!-- Left: Streaming Apps Grid -->
+    <main class="tv-content-area">
+      <!-- Big One-Click PC Banner -->
+      <div class="pc-mode-banner">
+        <div class="pc-banner-text">
+          <span style="font-size: 26px;">🖥️</span>
+          <span>Want to use standard Windows? Click to minimize TV mode and show your desktop.</span>
+        </div>
+        <button id="btn-banner-pc" class="btn-banner-switch">Switch to PC</button>
+      </div>
+
+      <div class="tv-section-header">
+        <div class="tv-section-title">STREAMING & APPS</div>
+        <div class="tv-section-actions">
+          <button type="button" id="btn-tv-edit-mode" class="btn-tv-action btn-tv-edit">✏️ Edit & Sort Tiles</button>
+          <button type="button" id="btn-tv-add-app" class="btn-tv-action btn-tv-add">➕ Add App</button>
+        </div>
+      </div>
+      <div id="tv-grid" class="tv-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </main>
+
+    <!-- Right Sidebar: QR Code Phone Pairing -->
+    <aside class="tv-pairing-sidebar">
+      <div class="tv-pairing-card">
+        <div class="qr-title">
+          <span>📱</span>
+          <span>Phone Remote</span>
+        </div>
+        <div class="qr-image-container">
+          <img src="{{ qr_code }}" alt="Scan QR Code to control" class="qr-image">
+        </div>
+        <div class="qr-url-badge">{{ server_url }}</div>
+        <div class="qr-help">
+          Point your Android camera at the QR code to open the phone remote instantly!
+        </div>
+      </div>
+
+      <div class="tv-info-card">
+        <div class="info-item">
+          <span>Navigation:</span>
+          <span class="info-val">Arrow Keys + Enter</span>
+        </div>
+        <div class="info-item">
+          <span>PC Desktop:</span>
+          <span class="info-val">Press ESC or F11</span>
+        </div>
+        <div class="info-item">
+          <span>Local IP:</span>
+          <span class="info-val">{{ local_ip }}</span>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Background Wallpaper Picker Modal -->
+  <div id="bg-modal" class="bg-modal-overlay">
+    <div class="bg-modal-card">
+      <div class="bg-modal-title">
+        <span>Select TV Background Wallpaper</span>
+        <button id="btn-close-bg-modal" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">✕</button>
+      </div>
+      <div id="bg-grid" class="bg-grid">
+        {% for wp in wallpapers %}
+        <div class="bg-thumb-card {% if wp.url == settings.background %}active{% endif %}"
+             style="background-image: url('{{ wp.url }}');"
+             data-wp-url="{{ wp.url }}">
+          <span class="bg-thumb-label">{{ wp.name }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- TV Add App Modal / App Catalog -->
+  <div id="tv-add-modal" class="bg-modal-overlay">
+    <div class="bg-modal-card tv-catalog-card">
+      <div class="bg-modal-title">
+        <span>📦 App Catalog & 1-Click Installer</span>
+        <button id="btn-close-tv-add-modal" style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">✕</button>
+      </div>
+
+      <!-- Search & Category Filter Chips -->
+      <div class="tv-catalog-controls">
+        <input type="text" id="tv-cat-search" class="cat-search-input" placeholder="🔍 Search apps (Tubi, Pluto, Netflix, Steam...)" autocomplete="off">
+        <div class="catalog-filters-scroll">
+          <button type="button" class="tv-cat-chip active" data-cat="All">All</button>
+          <button type="button" class="tv-cat-chip" data-cat="Free TV">🆓 Free TV (No Login)</button>
+          <button type="button" class="tv-cat-chip" data-cat="Streaming">🎬 Streaming</button>
+          <button type="button" class="tv-cat-chip" data-cat="Music">🎵 Music</button>
+          <button type="button" class="tv-cat-chip" data-cat="Gaming">🎮 Gaming</button>
+          <button type="button" class="tv-cat-chip" data-cat="News">📰 News</button>
+          <button type="button" class="tv-cat-chip" data-cat="custom">➕ Custom App/URL</button>
+        </div>
+      </div>
+
+      <!-- TV Catalog List -->
+      <div id="tv-catalog-list" class="tv-catalog-list">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- TV Custom App Form -->
+      <div id="tv-custom-form" style="display:none; flex-direction:column; gap:10px;">
+        <input type="text" id="tv-sc-name" placeholder="App Name (e.g. My Website)" style="padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:white; font-size:14px;">
+        <input type="text" id="tv-sc-url" placeholder="URL or Path (https://... or C:\...)" style="padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:white; font-size:14px;">
+        <select id="tv-sc-cat" style="padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:white; font-size:14px;">
+          <option value="Streaming">Streaming</option>
+          <option value="Free TV">Free TV</option>
+          <option value="Media">Media</option>
+          <option value="Games">Games</option>
+          <option value="System">System</option>
+        </select>
+        <div style="display:flex; gap:10px;">
+          <button type="button" id="btn-cancel-tv-custom" style="flex:1; background:rgba(255,255,255,0.1); color:white; border:none; padding:12px; border-radius:8px; font-weight:700; cursor:pointer;">Back to Catalog</button>
+          <button type="button" id="btn-save-tv-sc" style="flex:1; background:#6366f1; color:white; border:none; padding:12px; border-radius:8px; font-weight:800; cursor:pointer;">Save Shortcut</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/static/js/tv.js?v=8"></script>
+</body>
+</html>
