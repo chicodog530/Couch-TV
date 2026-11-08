@@ -9,7 +9,9 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 
-CERTS_DIR = Path(__file__).parent.parent / "config" / "certs"
+from server.paths import get_data_dir
+
+CERTS_DIR = get_data_dir() / "config" / "certs"
 CERT_FILE = CERTS_DIR / "couchpc_cert.pem"
 KEY_FILE = CERTS_DIR / "couchpc_key.pem"
 

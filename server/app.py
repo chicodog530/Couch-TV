@@ -11,7 +11,14 @@ from flask import Flask, render_template, request, jsonify
 from websockets.asyncio.server import serve
 import websockets
 
-PROJECT_ROOT = Path(__file__).parent.parent
+from server.paths import get_bundle_dir, get_data_dir, ensure_config_files
+
+ensure_config_files()
+
+BUNDLE_DIR = get_bundle_dir()
+DATA_DIR = get_data_dir()
+PROJECT_ROOT = BUNDLE_DIR
+
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from server.network_utils import get_local_ip, generate_qr_data_uri
@@ -28,7 +35,7 @@ FLASK_HTTPS_PORT = 5443
 WS_PORT = 5001
 WSS_PORT = 5002
 
-SETTINGS_PATH = PROJECT_ROOT / "config" / "settings.json"
+SETTINGS_PATH = DATA_DIR / "config" / "settings.json"
 
 WALLPAPERS = [
     {"id": "aurora", "name": "Northern Aurora", "url": "/static/wallpapers/aurora.jpg"},
@@ -126,7 +133,9 @@ def api_reorder_shortcuts():
 
 @flask_app.route("/api/catalog", methods=["GET"])
 def get_app_catalog():
-    cat_path = PROJECT_ROOT / "config" / "app_catalog.json"
+    cat_path = DATA_DIR / "config" / "app_catalog.json"
+    if not cat_path.exists():
+        cat_path = BUNDLE_DIR / "config" / "app_catalog.json"
     if not cat_path.exists():
         return jsonify([])
     try:

@@ -7,10 +7,12 @@ import time
 import threading
 from pathlib import Path
 
+from server.paths import get_data_dir
+
 logger = logging.getLogger(__name__)
 
-CONFIG_PATH = Path(__file__).parent.parent / "config" / "shortcuts.json"
-PROFILE_DIR = Path(__file__).parent.parent / "browser_profile"
+CONFIG_PATH = get_data_dir() / "config" / "shortcuts.json"
+PROFILE_DIR = get_data_dir() / "browser_profile"
 
 CHROME_PATH = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 EDGE_PATH = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
