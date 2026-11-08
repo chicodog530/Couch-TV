@@ -1,6 +1,10 @@
-# 📺 CouchPC: Windows TV Box & Mobile Controller
+# 📺 Couch-TV: Windows TV Box & Mobile Remote Controller
 
-Transform your Windows PC into a 10-foot TV Box / Home Theater PC, controlled directly from your Android phone via local Wi-Fi.
+[![GitHub Repo](https://img.shields.io/badge/GitHub-chicodog530%2FCouch--TV-blue?logo=github)](https://github.com/chicodog530/Couch-TV)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-green.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+Transform your Windows PC into a 10-foot TV Box / Home Theater PC, controlled directly from your phone via local Wi-Fi. 100% private, zero cloud servers, zero telemetry.
 
 ---
 
@@ -103,20 +107,33 @@ Transform your Windows PC into a 10-foot TV Box / Home Theater PC, controlled di
 
 ---
 
-## 🚀 How to Run
+## 🚀 Quick Installation & Setup
 
-1. Open File Explorer to:
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/chicodog530/Couch-TV.git
+   cd Couch-TV
    ```
-   C:\Users\chico\.gemini\antigravity\scratch\couch-pc
-   ```
-2. Double-click **`run.bat`**:
-   * Starts the local controller server.
-   * Opens the fullscreen TV Box interface on your TV.
-   * Displays the QR code and your local IP address.
-3. On your Android phone (connected to the same Wi-Fi network):
-   * Open your camera app and scan the QR code on the TV screen.
-   * Or open Chrome and navigate to `http://<YOUR_PC_IP>:5000`.
-   * In Chrome, tap the 3 dots `⋮` -> **"Add to Home Screen"** to install it as an app.
+
+2. **Run the Installer**:
+   * Double-click **`installer.bat`**:
+     * Automatically detects Python 3.10+.
+     * Creates an isolated virtual environment in `.venv/`.
+     * Upgrades `pip` and installs all packages from `requirements.txt`.
+     * Verifies package integrity.
+
+3. **Start Couch-TV**:
+   * Double-click **`run.bat`**:
+     * Automatically uses the `.venv` virtual environment.
+     * Starts the TV Box fullscreen launcher on your TV.
+     * Starts the secure local HTTP/HTTPS & WebSocket server.
+     * Shows the instant pairing QR code on your TV screen.
+   * *(Optional)* Double-click **`run_headless.bat`** if you only want the mobile remote server running silently in the system tray without the TV window.
+
+4. **Connect Your Phone**:
+   * Point your Android/iPhone camera at the QR code on the TV.
+   * Open the link in Chrome or your mobile browser.
+   * Tap the browser menu `⋮` -> **"Add to Home Screen"** to install the mobile remote as a native app!
 
 ---
 

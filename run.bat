@@ -1,8 +1,15 @@
 @echo off
-title CouchPC - TV Box & Remote Server
+title Couch-TV - TV Launcher & Remote Server
 cd /d "%~dp0"
+
+if exist ".venv\Scripts\python.exe" (
+    set "PY_EXE=.venv\Scripts\python.exe"
+) else (
+    set "PY_EXE=python"
+)
+
 echo ====================================================
-echo Starting CouchPC TV Box Mode...
+echo Starting Couch-TV (TV Mode)...
 echo ====================================================
-python server\app.py
+"%PY_EXE%" server\app.py
 pause
